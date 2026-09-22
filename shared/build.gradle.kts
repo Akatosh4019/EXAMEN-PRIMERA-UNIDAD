@@ -34,6 +34,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             // La API pública de inicialización y los ViewModels se consumirán desde Android e iOS.
             api(libs.koin.core)
             api(libs.koin.compose)
