@@ -14,6 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,6 +36,9 @@ fun DetalleCitaScreen(
 ) {
     val fase by viewModel.fase.collectAsState()
     var confirmarCancelacion by remember { mutableStateOf(false) }
+    var mostrarReprogramacion by remember(citaId) { mutableStateOf(false) }
+    var nuevaFecha by remember(citaId) { mutableStateOf("") }
+    var nuevaHora by remember(citaId) { mutableStateOf("") }
     LaunchedEffect(citaId) { viewModel.abrir(citaId) }
 
     when (val actual = fase) {
@@ -76,6 +82,42 @@ fun DetalleCitaScreen(
                     Text("La cancelación requiere más de 24 horas de anticipación",
                         style = MaterialTheme.typography.bodySmall)
                 }
+                if (actual.cita.estado == "Programada") {
+                    OutlinedButton(
+                        onClick = { mostrarReprogramacion = !mostrarReprogramacion },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Reprogramar cita") }
+                    if (mostrarReprogramacion) {
+                        OutlinedTextField(
+                            value = nuevaFecha,
+                            onValueChange = { nuevaFecha = it },
+                            label = { Text("Nueva fecha (AAAA-MM-DD)") },
+                            isError = actual.erroresHorario["fecha"] != null,
+                            supportingText = actual.erroresHorario["fecha"]?.let { mensaje ->
+                                { Text(mensaje) }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = nuevaHora,
+                            onValueChange = { nuevaHora = it },
+                            label = { Text("Nueva hora (HH:MM)") },
+                            isError = actual.erroresHorario["hora"] != null,
+                            supportingText = actual.erroresHorario["hora"]?.let { mensaje ->
+                                { Text(mensaje) }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Button(
+                            onClick = { viewModel.reprogramar(nuevaFecha, nuevaHora) },
+                            enabled = !actual.reprogramando,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text(if (actual.reprogramando) "Guardando…" else "Guardar nueva fecha y hora") }
+                    }
+                }
+                actual.mensajeExito?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
                 actual.errorAccion?.let {
                     Text(it, color = MaterialTheme.colorScheme.error)
                 }

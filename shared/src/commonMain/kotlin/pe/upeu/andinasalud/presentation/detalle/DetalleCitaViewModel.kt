@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCatalogoUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.ReprogramarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.CitaInvalidaException
 import pe.upeu.andinasalud.presentation.common.CitaUi
 import pe.upeu.andinasalud.presentation.common.aUi
 
@@ -20,6 +22,9 @@ sealed interface FaseDetalle {
         val puedeCancelar: Boolean,
         val cancelando: Boolean = false,
         val errorAccion: String? = null,
+        val reprogramando: Boolean = false,
+        val erroresHorario: Map<String, String> = emptyMap(),
+        val mensajeExito: String? = null,
     ) : FaseDetalle
     data class Error(val mensaje: String) : FaseDetalle
 }
@@ -28,6 +33,7 @@ class DetalleCitaViewModel(
     private val obtenerCita: ObtenerCitaUseCase,
     private val obtenerCatalogo: ObtenerCatalogoUseCase,
     private val cancelarCita: CancelarCitaUseCase,
+    private val reprogramarCita: ReprogramarCitaUseCase,
 ) : ViewModel() {
     private val _fase = MutableStateFlow<FaseDetalle>(FaseDetalle.Cargando)
     val fase = _fase.asStateFlow()
@@ -70,6 +76,28 @@ class DetalleCitaViewModel(
                 throw error
             } catch (error: Exception) {
                 _fase.value = actual.copy(errorAccion = error.message ?: "No se pudo cancelar")
+            }
+        }
+    }
+
+    fun reprogramar(fecha: String, hora: String) {
+        val actual = _fase.value as? FaseDetalle.Contenido ?: return
+        if (actual.cita.estado != "Programada" || actual.reprogramando) return
+        viewModelScope.launch {
+            _fase.value = actual.copy(reprogramando = true, erroresHorario = emptyMap(),
+                errorAccion = null, mensajeExito = null)
+            try {
+                val cambiada = reprogramarCita(citaId, fecha, hora)
+                _fase.value = actual.copy(cita = cambiada.aUi(obtenerCatalogo()),
+                    puedeCancelar = cancelarCita.puedeCancelar(cambiada),
+                    reprogramando = false, mensajeExito = "Cita reprogramada correctamente")
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: CitaInvalidaException) {
+                _fase.value = actual.copy(erroresHorario = error.errores, reprogramando = false)
+            } catch (error: Exception) {
+                _fase.value = actual.copy(errorAccion = error.message ?: "No se pudo reprogramar",
+                    reprogramando = false)
             }
         }
     }

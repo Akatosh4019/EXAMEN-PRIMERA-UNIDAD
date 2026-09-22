@@ -12,7 +12,9 @@ import pe.upeu.andinasalud.domain.usecase.CitaInvalidaException
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.ReglaCitaException
 import pe.upeu.andinasalud.domain.usecase.RelojClinico
+import pe.upeu.andinasalud.domain.usecase.ReprogramarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.ValidarHorarioCita
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -122,6 +124,40 @@ class ReglasCitaTest {
     }
 
     @Test
+    fun `SC-D reprograma sin cambiar id ni duplicar horario`() = runTest {
+        val repo = CitaRepositoryFake(reloj)
+        val reprogramar = ReprogramarCitaUseCase(repo, ValidarHorarioCita(reloj))
+        val cita = reprogramar(1, "2026-10-15", "10:30")
+        assertEquals(1L, cita.id)
+        assertEquals(LocalDate(2026, 10, 15), cita.fecha)
+        assertEquals(3, CupoCitasUseCase(repo).cantidadProgramadas(repo.listarCitas()))
+        val ocupada = requireNotNull(repo.obtenerCita(2))
+        val error = errorDe {
+            reprogramar(1, ocupada.fecha.toString(), ocupada.hora.toString())
+        }
+        assertTrue("hora" in error.errores)
+    }
+
+    @Test
+    fun `SC-D no reprograma una cita atendida`() = runTest {
+        val repo = CitaRepositoryFake(reloj)
+        val reprogramar = ReprogramarCitaUseCase(repo, ValidarHorarioCita(reloj))
+        try {
+            reprogramar(4, "2026-10-15", "10:30")
+            throw AssertionError("Debió rechazar la cita atendida")
+        } catch (_: ReglaCitaException) { }
+    }
+
+    @Test
+    fun `SC-D rechaza reprogramar para una fecha pasada`() = runTest {
+        val repo = CitaRepositoryFake(reloj)
+        val error = errorDe {
+            ReprogramarCitaUseCase(repo, ValidarHorarioCita(reloj))(1, "2026-09-21", "09:00")
+        }
+        assertTrue("fecha" in error.errores)
+    }
+
+    @Test
     fun `la lista muestra la proxima cita antes del historial`() = runTest {
         val repo = CitaRepositoryFake(reloj)
         val citas = ObtenerCitasUseCase(repo, reloj)()
@@ -137,5 +173,5 @@ class ReglasCitaTest {
     }
 
     private fun solicitar(repo: CitaRepositoryFake) =
-        SolicitarCitaUseCase(repo, reloj, CupoCitasUseCase(repo))
+        SolicitarCitaUseCase(repo, ValidarHorarioCita(reloj), CupoCitasUseCase(repo))
 }

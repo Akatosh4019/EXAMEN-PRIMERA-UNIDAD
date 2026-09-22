@@ -1,9 +1,5 @@
 package pe.upeu.andinasalud.domain.usecase
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.atTime
-import kotlinx.datetime.toInstant
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.model.ModalidadAtencion
@@ -11,7 +7,7 @@ import pe.upeu.andinasalud.domain.repository.CitaRepository
 
 class SolicitarCitaUseCase(
     private val repositorio: CitaRepository,
-    private val reloj: RelojClinico,
+    private val validarHorario: ValidarHorarioCita,
     private val cupoCitas: CupoCitasUseCase,
 ) {
     suspend operator fun invoke(
@@ -28,26 +24,10 @@ class SolicitarCitaUseCase(
         if (especialidad == null) errores["especialidad"] = "Selecciona una especialidad"
         if (sede == null) errores["sede"] = "Selecciona una sede"
 
-        val fecha = try {
-            LocalDate.parse(fechaTexto.trim())
-        } catch (_: IllegalArgumentException) {
-            errores["fecha"] = "Ingresa una fecha válida (AAAA-MM-DD)"
-            null
-        }
-        val hora = try {
-            LocalTime.parse(horaTexto.trim())
-        } catch (_: IllegalArgumentException) {
-            errores["hora"] = "Ingresa una hora válida (HH:MM)"
-            null
-        }
+        val (fecha, hora) = validarHorario.fechaHora(fechaTexto, horaTexto, errores)
         val motivo = motivoTexto.trim()
         if (motivo.length !in 10..200) {
             errores["motivo"] = "El motivo debe tener entre 10 y 200 caracteres"
-        }
-        if (fecha != null && hora != null &&
-            fecha.atTime(hora).toInstant(reloj.zona()) <= reloj.ahora()
-        ) {
-            errores["fecha"] = "La cita debe ser en una fecha y hora futuras"
         }
         if (errores.isNotEmpty()) throw CitaInvalidaException(errores)
 
@@ -65,7 +45,7 @@ class SolicitarCitaUseCase(
         if (!cupoCitas.puedeSolicitar(programadas.size)) {
             throw CitaInvalidaException(mapOf("general" to "Ya tienes tres citas programadas"))
         }
-        if (programadas.any { it.fecha == fechaValida && it.hora == horaValida }) {
+        if (validarHorario.horarioOcupado(programadas, fechaValida, horaValida)) {
             throw CitaInvalidaException(mapOf("hora" to "Ya tienes una cita programada en ese horario"))
         }
         return repositorio.registrarCita(
