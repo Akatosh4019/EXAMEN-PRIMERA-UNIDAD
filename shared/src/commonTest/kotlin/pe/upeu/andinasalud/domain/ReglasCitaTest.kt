@@ -46,6 +46,20 @@ class ReglasCitaTest {
     }
 
     @Test
+    fun `RN01 permite solicitar para hoy si la hora en Lima aun es futura`() = runTest {
+        val relojLima = object : RelojClinico {
+            override fun ahora(): Instant = Instant.parse("2026-09-22T20:00:00Z")
+            override fun zona(): TimeZone = TimeZone.of("America/Lima")
+        }
+        val repo = CitaRepositoryFake(relojLima)
+        CancelarCitaUseCase(repo, relojLima)(3, "Liberar cupo")
+        val cita = SolicitarCitaUseCase(repo, ValidarHorarioCita(relojLima), CupoCitasUseCase(repo))(
+            "medicina-general", "nana", "2026-09-22", "16:00", "Consulta médica general"
+        )
+        assertEquals(LocalDate(2026, 9, 22), cita.fecha)
+    }
+
+    @Test
     fun `RN02 impide una cuarta cita programada`() = runTest {
         val error = errorDe {
             solicitar(CitaRepositoryFake(reloj))(

@@ -7,5 +7,6 @@ import kotlin.time.Instant
 
 class RelojDelSistema : RelojClinico {
     override fun ahora(): Instant = Clock.System.now()
-    override fun zona(): TimeZone = TimeZone.currentSystemDefault()
+    // Las sedes del caso están en Perú; la zona del emulador puede ser GMT.
+    override fun zona(): TimeZone = TimeZone.of("America/Lima")
 }
