@@ -15,4 +15,6 @@ data class CitasUiState(
     val filtro: FiltroCitas = FiltroCitas.Todas,
     val busqueda: String = "",
     val soloHoy: Boolean = false,
+    val programadas: Int? = null,
+    val puedeSolicitar: Boolean = false,
 )

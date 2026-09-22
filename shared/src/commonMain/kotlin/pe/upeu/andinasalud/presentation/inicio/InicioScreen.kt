@@ -26,6 +26,7 @@ fun InicioScreen(
     onMisCitas: () -> Unit,
     onSolicitar: () -> Unit,
     onDetalle: (Long) -> Unit,
+    puedeSolicitar: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val fase by viewModel.fase.collectAsState()
@@ -53,8 +54,11 @@ fun InicioScreen(
         }
         Text("Accesos rápidos", style = MaterialTheme.typography.titleLarge)
         Button(onClick = onMisCitas, modifier = Modifier.fillMaxWidth()) { Text("Mis citas") }
-        OutlinedButton(onClick = onSolicitar, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = onSolicitar, enabled = puedeSolicitar,
+            modifier = Modifier.fillMaxWidth()) {
             Text("Solicitar cita")
         }
+        if (!puedeSolicitar) Text("Límite de tres citas programadas alcanzado",
+            style = MaterialTheme.typography.bodySmall)
     }
 }

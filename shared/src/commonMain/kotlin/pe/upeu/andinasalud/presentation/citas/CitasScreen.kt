@@ -57,7 +57,15 @@ fun CitasScreen(
                 )
             }
         }
-        Button(onClick = onSolicitar, modifier = Modifier.fillMaxWidth()) { Text("Solicitar cita") }
+        Button(
+            onClick = onSolicitar,
+            enabled = estado.puedeSolicitar,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Solicitar cita") }
+        if (estado.programadas != null && !estado.puedeSolicitar) {
+            Text("Límite de tres citas programadas alcanzado",
+                style = MaterialTheme.typography.bodySmall)
+        }
         Text("Mis citas", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
         when (val fase = estado.fase) {

@@ -11,6 +11,7 @@ import pe.upeu.andinasalud.domain.repository.CitaRepository
 class SolicitarCitaUseCase(
     private val repositorio: CitaRepository,
     private val reloj: RelojClinico,
+    private val cupoCitas: CupoCitasUseCase,
 ) {
     suspend operator fun invoke(
         especialidadId: String,
@@ -59,7 +60,7 @@ class SolicitarCitaUseCase(
         val programadas = repositorio.listarCitas().filter {
             it.pacienteId == paciente.id && it.estado is EstadoCita.Programada
         }
-        if (programadas.size >= 3) {
+        if (!cupoCitas.puedeSolicitar(programadas.size)) {
             throw CitaInvalidaException(mapOf("general" to "Ya tienes tres citas programadas"))
         }
         if (programadas.any { it.fecha == fechaValida && it.hora == horaValida }) {

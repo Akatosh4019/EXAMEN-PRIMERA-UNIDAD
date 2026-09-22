@@ -7,6 +7,7 @@ import pe.upeu.andinasalud.data.local.RelojDelSistema
 import pe.upeu.andinasalud.data.repository.CitaRepositoryFake
 import pe.upeu.andinasalud.domain.repository.CitaRepository
 import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.CupoCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCatalogoUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
@@ -26,10 +27,11 @@ val appModule = module {
     factory { ObtenerCitaUseCase(get()) }
     factory { ObtenerPacienteUseCase(get()) }
     factory { ObtenerCatalogoUseCase(get()) }
-    factory { SolicitarCitaUseCase(get(), get()) }
+    factory { CupoCitasUseCase(get()) }
+    factory { SolicitarCitaUseCase(get(), get(), get()) }
     factory { CancelarCitaUseCase(get(), get()) }
     viewModel { InicioViewModel(get(), get(), get()) }
-    viewModel { CitasViewModel(get(), get(), get()) }
+    viewModel { CitasViewModel(get(), get(), get(), get()) }
     viewModel { DetalleCitaViewModel(get(), get(), get()) }
     viewModel { SolicitudViewModel(get(), get()) }
     viewModel { PerfilViewModel(get()) }

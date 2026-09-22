@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import pe.upeu.andinasalud.data.repository.CitaRepositoryFake
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.CupoCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.CitaInvalidaException
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.ReglaCitaException
@@ -34,7 +35,7 @@ class ReglasCitaTest {
     @Test
     fun `RN01 impide solicitar una cita pasada`() = runTest {
         val error = errorDe {
-            SolicitarCitaUseCase(CitaRepositoryFake(reloj), reloj)(
+            solicitar(CitaRepositoryFake(reloj))(
                 "medicina-general", "nana", "2026-09-21", "09:00", "Consulta médica general"
             )
         }
@@ -44,11 +45,21 @@ class ReglasCitaTest {
     @Test
     fun `RN02 impide una cuarta cita programada`() = runTest {
         val error = errorDe {
-            SolicitarCitaUseCase(CitaRepositoryFake(reloj), reloj)(
+            solicitar(CitaRepositoryFake(reloj))(
                 "medicina-general", "nana", "2026-10-12", "09:00", "Consulta médica general"
             )
         }
         assertTrue("general" in error.errores)
+    }
+
+    @Test
+    fun `SC-B contador y disponibilidad usan la misma regla RN02`() = runTest {
+        val repo = CitaRepositoryFake(reloj)
+        val cupo = CupoCitasUseCase(repo)
+        assertEquals(3, cupo.cantidadProgramadas(repo.listarCitas()))
+        assertTrue(!cupo.puedeSolicitar(3))
+        CancelarCitaUseCase(repo, reloj)(1, "Liberar cupo")
+        assertTrue(cupo.puedeSolicitar(cupo.cantidadProgramadas(repo.listarCitas())))
     }
 
     @Test
@@ -68,7 +79,7 @@ class ReglasCitaTest {
     @Test
     fun `RN04 exige un motivo entre diez y doscientos caracteres`() = runTest {
         val error = errorDe {
-            SolicitarCitaUseCase(CitaRepositoryFake(reloj), reloj)(
+            solicitar(CitaRepositoryFake(reloj))(
                 "medicina-general", "nana", "2026-10-12", "09:00", "Corto"
             )
         }
@@ -81,7 +92,7 @@ class ReglasCitaTest {
         CancelarCitaUseCase(repo, reloj)(3, "Liberar un cupo")
         val ocupada = requireNotNull(repo.obtenerCita(2))
         val error = errorDe {
-            SolicitarCitaUseCase(repo, reloj)(
+            solicitar(repo)(
                 "medicina-general", "nana", ocupada.fecha.toString(), ocupada.hora.toString(),
                 "Consulta médica general"
             )
@@ -93,7 +104,7 @@ class ReglasCitaTest {
     fun `una solicitud valida se registra despues de liberar un cupo`() = runTest {
         val repo = CitaRepositoryFake(reloj)
         CancelarCitaUseCase(repo, reloj)(3, "Liberar un cupo")
-        val creada = SolicitarCitaUseCase(repo, reloj)(
+        val creada = solicitar(repo)(
             "medicina-general", "nana", "2026-10-12", "09:00", "Consulta médica general"
         )
         assertEquals(7L, creada.id)
@@ -114,4 +125,7 @@ class ReglasCitaTest {
     } catch (error: CitaInvalidaException) {
         error
     }
+
+    private fun solicitar(repo: CitaRepositoryFake) =
+        SolicitarCitaUseCase(repo, reloj, CupoCitasUseCase(repo))
 }

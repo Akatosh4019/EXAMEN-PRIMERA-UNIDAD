@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.usecase.CatalogoClinico
+import pe.upeu.andinasalud.domain.usecase.CupoCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCatalogoUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.RelojClinico
@@ -21,6 +22,7 @@ class CitasViewModel(
     private val obtenerCitas: ObtenerCitasUseCase,
     private val obtenerCatalogo: ObtenerCatalogoUseCase,
     private val reloj: RelojClinico,
+    private val cupoCitas: CupoCitasUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CitasUiState())
     val uiState = _uiState.asStateFlow()
@@ -35,6 +37,10 @@ class CitasViewModel(
             try {
                 catalogo = obtenerCatalogo()
                 citas = obtenerCitas()
+                val cantidad = cupoCitas.cantidadProgramadas(citas)
+                _uiState.update {
+                    it.copy(programadas = cantidad, puedeSolicitar = cupoCitas.puedeSolicitar(cantidad))
+                }
                 filtrar()
             } catch (error: CancellationException) {
                 throw error
