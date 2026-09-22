@@ -11,14 +11,17 @@ class CancelarCitaUseCase(
     private val repositorio: CitaRepository,
     private val reloj: RelojClinico,
 ) {
+    fun puedeCancelar(cita: Cita): Boolean =
+        cita.estado is EstadoCita.Programada &&
+            cita.fecha.atTime(cita.hora).toInstant(reloj.zona()) - reloj.ahora() > 24.hours
+
     suspend operator fun invoke(id: Long, motivo: String): Cita {
         val cita = repositorio.obtenerCita(id)
             ?: throw ReglaCitaException("La cita no existe")
         if (cita.estado !is EstadoCita.Programada) {
             throw ReglaCitaException("Solo se puede cancelar una cita programada")
         }
-        val faltante = cita.fecha.atTime(cita.hora).toInstant(reloj.zona()) - reloj.ahora()
-        if (faltante <= 24.hours) {
+        if (!puedeCancelar(cita)) {
             throw ReglaCitaException("La cita solo puede cancelarse con más de 24 horas de anticipación")
         }
         return repositorio.actualizarCita(
