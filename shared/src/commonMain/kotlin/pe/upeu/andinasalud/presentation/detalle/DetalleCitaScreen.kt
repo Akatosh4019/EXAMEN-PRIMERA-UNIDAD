@@ -57,7 +57,12 @@ fun DetalleCitaScreen(
                         DatoDetalle("Fecha", actual.cita.fecha)
                         DatoDetalle("Hora", actual.cita.hora)
                         DatoDetalle("Motivo", actual.cita.motivo)
-                        actual.cita.indicaciones?.let { DatoDetalle("Indicaciones", it) }
+                        actual.cita.indicaciones?.let {
+                            DatoDetalle(
+                                if (actual.cita.estado == "Cancelada") "Motivo de cancelación" else "Indicaciones",
+                                it,
+                            )
+                        }
                     }
                 }
                 if (actual.puedeCancelar) {

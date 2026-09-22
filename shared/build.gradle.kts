@@ -19,6 +19,9 @@ kotlin {
         namespace = "pe.upeu.andinasalud.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
         }
