@@ -48,4 +48,4 @@ Los datos se reinician al cerrar el proceso, porque el repositorio es solo en me
 
 ## Git y evidencias
 
-El trabajo está en `feature/citas-valencia`. La rama `develop` contiene la base integrada y `main` no se ha actualizado con esta funcionalidad. Los cambios SC-A, SC-B, SC-C y SC-D están en commits separados. Las capturas finales y la demostración en iOS deben verificarse antes de etiquetar una versión de entrega.
+El trabajo se desarrolló en `feature/citas-valencia` y se integró por fusiones a `develop` y `main`. La etiqueta `v1.0-unidad1` identifica el commit de producto evaluado. Los cambios SC-A, SC-B, SC-C y SC-D constan en commits separados. La ejecución visual en iOS y las capturas finales de estos cambios siguen pendientes de verificación; compilar el módulo compartido no sustituye esa evidencia.
