@@ -22,7 +22,7 @@ import pe.upeu.andinasalud.presentation.solicitud.SolicitudViewModel
 val appModule = module {
     single<RelojClinico> { RelojDelSistema() }
     single<CitaRepository> { CitaRepositoryFake(get()) }
-    factory { ObtenerCitasUseCase(get()) }
+    factory { ObtenerCitasUseCase(get(), get()) }
     factory { ObtenerCitaUseCase(get()) }
     factory { ObtenerPacienteUseCase(get()) }
     factory { ObtenerCatalogoUseCase(get()) }
