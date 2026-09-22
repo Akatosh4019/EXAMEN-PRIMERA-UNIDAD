@@ -2,6 +2,7 @@ package pe.upeu.andinasalud.presentation.common
 
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.usecase.CatalogoClinico
 
 enum class FiltroCitas(val etiqueta: String) {
@@ -19,6 +20,7 @@ data class CitaUi(
     val filtro: FiltroCitas,
     val motivo: String,
     val indicaciones: String?,
+    val modalidad: ModalidadAtencion,
 )
 
 fun Cita.aUi(catalogo: CatalogoClinico): CitaUi {
@@ -39,6 +41,7 @@ fun Cita.aUi(catalogo: CatalogoClinico): CitaUi {
         filtro = filtroCita,
         motivo = motivo,
         indicaciones = indicaciones,
+        modalidad = modalidad,
     )
 }
 

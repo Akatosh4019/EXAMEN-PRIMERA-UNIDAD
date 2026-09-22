@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import pe.upeu.andinasalud.presentation.common.EstadoPanel
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 
 @Composable
 fun SolicitudScreen(viewModel: SolicitudViewModel, modifier: Modifier = Modifier) {
@@ -63,6 +64,13 @@ fun SolicitudScreen(viewModel: SolicitudViewModel, modifier: Modifier = Modifier
                             opciones = fase.catalogo.sedes.map { it.id to it.nombre },
                             error = estado.errores["sede"],
                             onSeleccionar = viewModel::cambiarSede,
+                        )
+                        SelectorCita(
+                            titulo = "Modalidad de atención",
+                            valor = estado.formulario.modalidad.etiqueta,
+                            opciones = ModalidadAtencion.entries.map { it.name to it.etiqueta },
+                            error = null,
+                            onSeleccionar = { viewModel.cambiarModalidad(ModalidadAtencion.valueOf(it)) },
                         )
                         CampoSolicitud(
                             valor = estado.formulario.fecha,

@@ -53,6 +53,7 @@ fun DetalleCitaScreen(
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         DatoDetalle("Médico", actual.cita.medico)
+                        DatoDetalle("Modalidad", actual.cita.modalidad.etiqueta)
                         DatoDetalle("Sede", actual.cita.sede)
                         DatoDetalle("Fecha", actual.cita.fecha)
                         DatoDetalle("Hora", actual.cita.hora)

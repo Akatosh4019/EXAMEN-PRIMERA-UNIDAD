@@ -6,6 +6,7 @@ import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.Especialidad
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.model.Medico
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.model.Paciente
 import pe.upeu.andinasalud.domain.model.Sede
 import pe.upeu.andinasalud.domain.usecase.RelojClinico
@@ -15,10 +16,10 @@ import kotlin.time.Duration.Companion.days
 object CitasSimuladas {
     val paciente = Paciente(
         id = "P-0417",
-        nombre = "Lucía Quispe Mamani",
-        documento = "70154823",
-        correo = "lucia.quispe@correo.pe",
-        telefono = "987 654 321",
+        nombre = "Roberto Samuel Valencia Saavedra",
+        documento = "72870236",
+        correo = "samuelvalencia3019@gmail.com",
+        telefono = "917 595 344",
     )
 
     val sedes = listOf(
@@ -57,7 +58,7 @@ object CitasSimuladas {
             Cita(1, pacienteId, "medicina-general", "M01", "nana", fechaEn(2), LocalTime(9, 0),
                 "Consulta médica general", EstadoCita.Programada(true)),
             Cita(2, pacienteId, "odontologia", "M03", "chosica", fechaEn(5), LocalTime(16, 30),
-                "Evaluación odontológica", EstadoCita.Programada(false)),
+                "Evaluación odontológica", EstadoCita.Programada(false), ModalidadAtencion.Teleconsulta),
             Cita(3, pacienteId, "nutricion", "M07", "santa-anita", fechaEn(9), LocalTime(11, 15),
                 "Seguimiento nutricional", EstadoCita.Programada(true)),
             Cita(4, pacienteId, "pediatria", "M05", "chaclacayo", fechaEn(-4), LocalTime(8, 45),

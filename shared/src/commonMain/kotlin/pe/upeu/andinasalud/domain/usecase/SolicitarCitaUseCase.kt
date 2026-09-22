@@ -6,6 +6,7 @@ import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.repository.CitaRepository
 
 class SolicitarCitaUseCase(
@@ -19,6 +20,7 @@ class SolicitarCitaUseCase(
         fechaTexto: String,
         horaTexto: String,
         motivoTexto: String,
+        modalidad: ModalidadAtencion = ModalidadAtencion.Presencial,
     ): Cita {
         val errores = mutableMapOf<String, String>()
         val especialidad = repositorio.especialidades().firstOrNull { it.id == especialidadId }
@@ -77,6 +79,7 @@ class SolicitarCitaUseCase(
                 hora = horaValida,
                 motivo = motivo,
                 estado = EstadoCita.Programada(recordatorioActivo = true),
+                modalidad = modalidad,
             )
         )
     }

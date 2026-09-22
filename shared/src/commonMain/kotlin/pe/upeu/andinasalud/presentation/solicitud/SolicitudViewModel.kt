@@ -12,6 +12,7 @@ import pe.upeu.andinasalud.domain.usecase.CatalogoClinico
 import pe.upeu.andinasalud.domain.usecase.CitaInvalidaException
 import pe.upeu.andinasalud.domain.usecase.ObtenerCatalogoUseCase
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 
 sealed interface FaseSolicitud {
     data object Cargando : FaseSolicitud
@@ -25,6 +26,7 @@ data class FormularioSolicitud(
     val fecha: String = "",
     val hora: String = "",
     val motivo: String = "",
+    val modalidad: ModalidadAtencion = ModalidadAtencion.Presencial,
 )
 
 data class SolicitudUiState(
@@ -63,6 +65,7 @@ class SolicitudViewModel(
     fun cambiarFecha(valor: String) = cambiar("fecha") { copy(fecha = valor) }
     fun cambiarHora(valor: String) = cambiar("hora") { copy(hora = valor) }
     fun cambiarMotivo(valor: String) = cambiar("motivo") { copy(motivo = valor) }
+    fun cambiarModalidad(valor: ModalidadAtencion) = cambiar("modalidad") { copy(modalidad = valor) }
 
     private fun cambiar(campo: String, cambio: FormularioSolicitud.() -> FormularioSolicitud) {
         _uiState.update {
@@ -78,7 +81,8 @@ class SolicitudViewModel(
         viewModelScope.launch {
             try {
                 val f = actual.formulario
-                val cita = solicitarCita(f.especialidadId, f.sedeId, f.fecha, f.hora, f.motivo)
+                val cita = solicitarCita(f.especialidadId, f.sedeId, f.fecha, f.hora, f.motivo,
+                    f.modalidad)
                 _uiState.update {
                     it.copy(formulario = FormularioSolicitud(), enviando = false,
                         mensajeExito = "Cita #${cita.id} solicitada correctamente")

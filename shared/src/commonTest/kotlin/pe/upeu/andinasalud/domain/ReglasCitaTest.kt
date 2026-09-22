@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import pe.upeu.andinasalud.data.repository.CitaRepositoryFake
 import pe.upeu.andinasalud.domain.model.EstadoCita
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.CupoCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.CitaInvalidaException
@@ -109,6 +110,15 @@ class ReglasCitaTest {
         )
         assertEquals(7L, creada.id)
         assertTrue(creada.estado is EstadoCita.Programada)
+    }
+
+    @Test
+    fun `SC-C conserva la modalidad elegida al registrar`() = runTest {
+        val repo = CitaRepositoryFake(reloj)
+        CancelarCitaUseCase(repo, reloj)(3, "Liberar cupo")
+        val creada = solicitar(repo)("medicina-general", "nana", "2026-10-12", "09:00",
+            "Consulta médica general", ModalidadAtencion.Teleconsulta)
+        assertEquals(ModalidadAtencion.Teleconsulta, repo.obtenerCita(creada.id)?.modalidad)
     }
 
     @Test
