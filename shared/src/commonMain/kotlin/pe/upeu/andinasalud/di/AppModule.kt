@@ -29,7 +29,7 @@ val appModule = module {
     factory { SolicitarCitaUseCase(get(), get()) }
     factory { CancelarCitaUseCase(get(), get()) }
     viewModel { InicioViewModel(get(), get(), get()) }
-    viewModel { CitasViewModel(get(), get()) }
+    viewModel { CitasViewModel(get(), get(), get()) }
     viewModel { DetalleCitaViewModel(get(), get(), get()) }
     viewModel { SolicitudViewModel(get(), get()) }
     viewModel { PerfilViewModel(get()) }

@@ -14,4 +14,5 @@ data class CitasUiState(
     val fase: FaseCitas = FaseCitas.Cargando,
     val filtro: FiltroCitas = FiltroCitas.Todas,
     val busqueda: String = "",
+    val soloHoy: Boolean = false,
 )

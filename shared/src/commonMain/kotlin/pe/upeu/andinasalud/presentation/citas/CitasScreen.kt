@@ -44,6 +44,11 @@ fun CitasScreen(
             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            FilterChip(
+                selected = estado.soloHoy,
+                onClick = viewModel::cambiarSoloHoy,
+                label = { Text("Hoy") },
+            )
             FiltroCitas.entries.forEach { filtro ->
                 FilterChip(
                     selected = estado.filtro == filtro,
